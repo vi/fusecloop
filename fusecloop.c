@@ -65,7 +65,7 @@ static int fusecloop_getattr(const char *path, struct stat *stbuf)
 	
     memcpy(stbuf,&stb,sizeof stb);
     stbuf->st_mode&=~0222;
-    stbuf->st_size = cd.blocksize * cd.numblocks;
+    stbuf->st_size = (loff_t) cd.blocksize * cd.numblocks;
     /*
     stbuf->st_mode = S_IFREG | 0444;
     stbuf->st_nlink = 1;

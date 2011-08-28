@@ -41,6 +41,73 @@ struct cloop_head
 /* data_index (num_blocks 64bit pointers, network order)...      */
 /* compressed data (gzip block compressed format)...             */
 
+struct cloop_tail
+{
+	u_int32_t index_size;
+	u_int32_t num_blocks;
+};
+
+struct block_info
+{
+	loff_t offset;		/* 64-bit offsets of compressed block */
+	u_int32_t size;		/* 32-bit compressed block size */
+	u_int32_t optidx;	/* 32-bit index number */
+};
+
+static inline char *build_index(struct block_info *offsets, unsigned long n)
+{
+	u_int32_t *ofs32 = (u_int32_t *) offsets;
+	loff_t    *ofs64 = (loff_t *) offsets;
+	
+	if (ofs32[0] == 0) {
+		if (ofs32[2]) { /* ACCELERATED KNOPPIX V1.0 */
+			while (n--) {
+				offsets[n].offset = __be64_to_cpu(offsets[n].offset);
+				offsets[n].size = ntohl(offsets[n].size);
+			}
+			return "128BE accelerated knoppix 1.0";
+		}
+		else { /* V2.0 */
+			loff_t last = __be64_to_cpu(ofs64[n]);
+			while (n--) {
+				offsets[n].size = last - 
+					(offsets[n].offset = __be64_to_cpu(ofs64[n])); 
+				last = offsets[n].offset;
+			}
+			return "64BE v2.0";
+		}
+	}
+	else if (ofs32[1] == 0) { /* V1.0 */
+		loff_t last = __be64_to_cpu(ofs64[n]);
+		while (n--) {
+			offsets[n].size = last - 
+				(offsets[n].offset = __le64_to_cpu(ofs64[n])); 
+			last = offsets[n].offset;
+		}
+		return "64LE v1.0";
+	}
+	else if (ntohl(ofs32[0]) == (4*n) + 0x8C) { /* V0.68 */
+		loff_t last = ntohl(ofs32[n]);
+		while (n--) {
+			offsets[n].size = last - 
+				(offsets[n].offset = ntohl(ofs32[n])); 
+			last = offsets[n].offset;
+		}
+		return "32BE v0.68";
+	}
+	else { /* V3.0 */
+		int i, j;
+		
+		for (i = n; i-- > 0; )
+			offsets[i].size = ntohl(ofs32[i]); 
+		for (i = 0, j = sizeof(struct cloop_head); i < n; i++) {
+			offsets[i].offset = j;
+			j += offsets[i].size;
+		}
+		return "32BE v3.0";
+	}
+}
+
 /* Cloop suspend IOCTL */
 #define CLOOP_SUSPEND 0x4C07
 

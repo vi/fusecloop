@@ -33,7 +33,7 @@ struct cloop_data{
     int numblocks;
     ulong blocksize;
 
-    loff_t* toc; /* Data index */
+    struct block_info *toc; /* Data index */
     size_t tocsize;
 
     unsigned char* cblock;  /* Compressed block */

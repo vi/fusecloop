@@ -1,15 +1,18 @@
 PROGNAME=fusecloop
 ARCFILES=*.c *.h *.pl Makefile configure README VERSION HELP INSTALL typescript *.cloop COPYING
-PROGS=fusecloop cloopreaderdemo extract_compressed_fs
+PROGS=fusecloop cloopreaderdemo extract_compressed_fs create_compressed_fs
 FUSECFLAGS=`pkg-config fuse --cflags`
 FUSELDFLAGS=`pkg-config fuse --libs` 
 
 CFLAGS= -Wall
 
-all: fusecloop extract_compressed_fs 
+all: fusecloop extract_compressed_fs create_compressed_fs
 
 extract_compressed_fs: extract_compressed_fs.c
 	${CC} ${CFLAGS} ${LDFLAGS} -lz extract_compressed_fs.c -o extract_compressed_fs
+
+create_compressed_fs: create_compressed_fs.c
+	${CC} ${CFLAGS} ${LDFLAGS} -lz create_compressed_fs.c -o create_compressed_fs
 
 fusecloop: fusecloop.c cloopreader.o strver debug.o
 	${CC} ${CFLAGS} ${LDFLAGS} -lz cloopreader.o ${FUSECFLAGS} ${FUSELDFLAGS} fusecloop.c debug.o -o fusecloop

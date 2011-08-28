@@ -59,10 +59,21 @@ int cloop_init(struct cloop_data *c, int fh){
 
     ALLOC(c->pblock,c->blocksize);
 
-    c->tocsize=sizeof *c->toc * (c->numblocks+1); /* One extra address is position of EOF */
+    c->tocsize=sizeof(*c->toc) * c->numblocks;
+    if (c->numblocks == -1) {
+	struct cloop_tail tail;
+	loff_t end = lseek(c->fh,0,SEEK_END); /* lseek(,-n,SEEK_END) buggy ? */
+
+	OP(lseek(c->fh, end - sizeof(tail), SEEK_SET)); 
+	OP(read_all(c->fh, &tail, sizeof(tail)));
+	c->numblocks = ntohl(tail.num_blocks);
+	c->tocsize = ntohl(tail.index_size) * c->numblocks;
+	OP(lseek(c->fh, end - sizeof(tail) - c->tocsize, SEEK_SET));
+    }
     ALLOC(c->toc,c->tocsize);
 
     OP(read_all(c->fh,c->toc,c->tocsize));  /* read Data Index */
+    build_index(c->toc, c->numblocks);
     c->cblocksizecur=0;
     c->curblock=-1;
     return 0;
@@ -79,10 +90,10 @@ int cloop_swap(struct cloop_data *c,ulong page){
     if(page>=c->numblocks){errno=EFAULT;return -1;}
     c->curblock=page;
 
-    bprintf("Seeking to 0x%Lx\n",btc(c->toc[page]));
-    OP(lseek(c->fh,btc(c->toc[page]), SEEK_SET)); 
+    bprintf("Seeking to 0x%Lx\n",c->toc[page].offset);
+    OP(lseek(c->fh,c->toc[page].offset, SEEK_SET)); 
 
-    c->cblocksize=btc(c->toc[page+1]) - btc(c->toc[page]);
+    c->cblocksize=c->toc[page].size;
     bprintf("Compressed size=%lu\n",c->cblocksize);
     if(c->cblocksize > c->cblocksizecur){
 	if(c->cblocksizecur)free(c->cblock);

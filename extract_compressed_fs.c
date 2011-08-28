@@ -1,15 +1,19 @@
 /* Extracts a filesystem back from a compressed fs file */
+#define _LARGEFILE64_SOURCE
 #include "common_header.h"
+#define CLOOP_PREAMBLE "#!/bin/sh\n" "#V2.0 Format\n" "insmod cloop.o file=$0 && mount -r -t iso9660 /dev/cloop $1\n" "exit $?\n"
 
 int main(int argc, char *argv[])
 {
 	int handle;
 	struct cloop_head head;
 	unsigned int i;
+	unsigned long num_blocks, block_size, zblock_maxsize;
 	unsigned char *buffer, *clear_buffer;
+	struct block_info *offsets;
 
-	if (argc != 2) {
-		fprintf(stderr, "Need filename\n");
+	if (argc < 2 || argv[1][0] == '-') {
+		fprintf(stderr, "Usage: extract_compressed_fs file [--convert-to-v2] > output\n");
 		exit(1);
 	}
 
@@ -24,44 +28,77 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	buffer = malloc(ntohl(head.block_size) + ntohl(head.block_size)/1000
-			+ 12 + 4);
-	clear_buffer = malloc(ntohl(head.block_size));
-	fprintf(stderr, "%u blocks of size %u. Preamble:\n%s\n", 
-		ntohl(head.num_blocks), ntohl(head.block_size), head.preamble);
+	num_blocks = ntohl(head.num_blocks);
+	block_size = ntohl(head.block_size);
+	zblock_maxsize =  block_size + block_size/1000 + 12 + 4;
+	buffer = malloc(zblock_maxsize);
+	clear_buffer = malloc(block_size);
+	fprintf(stderr, "%lu blocks of size %lu. Preamble:\n%s\n", 
+		num_blocks, block_size, head.preamble);
 
-	for (i = 0; i < ntohl(head.num_blocks); i++) {
-		int currpos;
-		unsigned long destlen = ntohl(head.block_size);
-		loff_t offset[2];
-		unsigned int size;
+	if (num_blocks == -1) {
+		struct cloop_tail tail;
+		loff_t end = lseek64(handle, 0, SEEK_END);
+		if (lseek64(handle, end - sizeof(tail), SEEK_SET) < 0 ||
+		    read(handle, &tail, sizeof(tail)) != sizeof(tail) ||
+		    lseek64(handle, end - sizeof(tail) - 
+		    	  (ntohl(tail.num_blocks) * ntohl(tail.index_size)), 
+		    	  SEEK_SET) < 0) {
+			perror("Reading tail\n");
+			exit(1);
+		}
+		head.num_blocks = tail.num_blocks;
+		num_blocks = ntohl(head.num_blocks);
+		i = num_blocks * ntohl(tail.index_size);
+	}
+	else i = num_blocks * sizeof(*offsets);
+	offsets = malloc(i);
+	if (!offsets || read(handle, offsets, i) != i) {
+		perror("Reading index\n");
+		exit(1);
+	}
+	
+	fprintf(stderr, "Index %s.\n", build_index(offsets, num_blocks));
+	
+	if (argc > 2) {
+		loff_t data, offset = ((num_blocks + 1) * sizeof(offset)) + sizeof(head);
+		
+		strcpy(head.preamble, CLOOP_PREAMBLE);
+		write(STDOUT_FILENO, &head, sizeof(head));
+		for (i = 0; i < num_blocks; i++) {
+			data = __be64_to_cpu(offset);
+			write(STDOUT_FILENO, &data, sizeof(data));
+			offset += offsets[i].size;
+		}
+		data = __be64_to_cpu(offset);
+		write(STDOUT_FILENO, &data, sizeof(data));
+		for (i = 0; i < num_blocks && lseek64(handle, offsets[i].offset, SEEK_SET) >= 0; i++) {
+			read(handle, buffer, offsets[i].size);
+			write(STDOUT_FILENO, buffer, offsets[i].size);
+		}
+		return 0;
+	}
+	
+	for (i = 0; i < num_blocks; i++) {
+		unsigned long destlen = block_size;
+		unsigned int size = offsets[i].size;
 
-		read(handle, &offset, 2*sizeof(loff_t));
-                lseek(handle, -sizeof(loff_t), SEEK_CUR);
-                
-		currpos = lseek(handle, 0, SEEK_CUR);
-		if (lseek(handle, __be64_to_cpu(offset[0]), SEEK_SET) < 0) {
+		if (lseek64(handle, offsets[i].offset, SEEK_SET) < 0) {
 			fprintf(stderr, "lseek to %Lu: %s\n",
-				__be64_to_cpu(offset[0]), strerror(errno));
+				offsets[i].offset, strerror(errno));
 			exit(1);
 		}
                 
-                size=__be64_to_cpu(offset[1])-__be64_to_cpu(offset[0]);
-		if (size > ntohl(head.block_size) + ntohl(head.block_size)/1000
-		    + 12 + 4) {
+		if (size > zblock_maxsize) {
 			fprintf(stderr, 
 				"Size %u for block %u (offset %Lu) too big\n",
-				size, i, __be64_to_cpu(offset[0]));
+				size, i, offsets[i].offset);
 			exit(1);
 		}
 		read(handle, buffer, size);
-		if (lseek(handle, currpos, SEEK_SET) < 0) {
-			perror("seeking");
-			exit(1);
-		}
 
-		fprintf(stderr, "Block %u length %u => %lu\n",
-			i, size, destlen);
+		fprintf(stderr, "Block %u at %llu length %u => %lu\n",
+			i, offsets[i].offset, size, destlen);
 		if (i == 3) {
 			fprintf(stderr,
 				"Block head:%02X%02X%02X%02X%02X%02X%02X%02X\n",
@@ -105,12 +142,12 @@ int main(int argc, char *argv[])
 			fprintf(stderr, "Uncomp: unknown error %u\n", i);
 			exit(1);
 		}
-		if (destlen != ntohl(head.block_size)) {
-			fprintf(stderr, "Uncomp: bad len %u (%lu not %u)\n", i,
-				destlen, ntohl(head.block_size));
+		if (destlen != block_size) {
+			fprintf(stderr, "Uncomp: bad len %u (%lu not %lu)\n", i,
+				destlen, block_size);
 			exit(1);
 		}
-		write(STDOUT_FILENO, clear_buffer, ntohl(head.block_size));
+		write(STDOUT_FILENO, clear_buffer, block_size);
 	}
 	return 0;
 }
