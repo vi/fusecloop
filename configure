@@ -1,0 +1,9 @@
+#!/bin/sh
+pkg-config fuse && echo 'type "make"' || {
+    if pkg-config --version; then
+	echo "Install libfuse (debian: apt-get install libfuse-dev)"
+	echo "                (source: fuse-x.y.z.tar.gz          )"
+    else
+	echo "Install pkg-config (debian: apt-get install pkg-config)"
+    fi    
+}

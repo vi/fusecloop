@@ -1,0 +1,14 @@
+This is fusecloop, FUSE mounter for Knoopix's cloop compresed images
+It allows to access filesystem in KNOPPIX image completely from FUSE:
+
+mkdir ~/mnt/kn1
+touch ~/mnt/kn2
+mkdir ~/mnt/kn3
+~/bin/mountlo -o ro ~/knoppix.iso ~/mnt/kn1
+~/bin/fusecloop ~/mnt/kn1/KNOPPIX/KNOPPIX ~/mnt/kn2 -o nonempty
+~/bin/mountlo -o ro ~/mnt/kn2 ~/mnt/kn3
+
+It works for me:
+cat ./typescript
+
+Note: it is my the first published FOSS project

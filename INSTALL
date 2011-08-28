@@ -1,0 +1,6 @@
+# It is alpha version.
+
+./configure # just to check whether pkg-config and libfuse-dev installed
+make
+make test
+cp fusecloop /usr/local/bin/
