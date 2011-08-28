@@ -1,0 +1,285 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru">
+	<head>
+		<title>cloop для FUSE</title>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+		<meta name="description" content="Страница проекта Cloop for FUSE."/>
+		<meta name="keywords"    content="fusecloop,FUSE,cloop,сжатие,пользователький"/>
+	</head>
+	<body>
+		<table border="1">
+		    <!-- Header !-->
+		    <tr>
+			<td colspan="2"> 
+			    <table width="100%">
+			    <tr>
+				<th align="left">
+				    <a href="index.html">English</a>, <a href="index_by.html">Byelarussian</a>, Russian.
+				</th>
+				<th>
+				    <big>fusecloop -- монтирование сжатых cloop-файлов через FUSE</big>
+				</th>
+			    </tr>
+			    </table>
+			</td>
+		    </tr>
+
+		    <tr>
+			<!-- Left section !-->
+			<td valign="top">
+			    <ul>
+				<li>
+				    <a href="typescript_mountlo.html">
+					Демонстрационная сессия (метод mountlo)
+				    </a>
+				</li>
+				<li>
+				    <a href="typescript_fuseiso.html">
+					Демонстрационная сессия (метод fuseiso)
+				    </a>
+				</li>
+			    </ul>
+			    Ссылки:
+			    <ul>
+				<li>
+				<a href="http://sourceforge.net/projects/fusecloop/">
+				    Страница проекта на sf.net
+				</a>
+				</li>
+                                <li>
+    <a href="http://sourceforge.net/projects/fusecloop/files/">
+	Скачать с sf.net
+    </a>
+				</li>
+				<li>
+				<a href="http://sourceforge.net/forum/forum.php?forum_id=731223">
+				    Форум на sf.net
+				</a>
+				</li>
+			    </ul>
+			    Другие ссылки:
+			    <ul>
+				<li>
+				    <a href="http://fuse.sourceforge.net/">
+				    FUSE
+				    </a>
+				</li>
+				<li>
+    <a href="http://fuse.sourceforge.net/wiki/index.php/FuseIso">
+	fuseiso
+    </a>
+				</li>
+				<li>
+    <a href="http://sourceforge.net/project/showfiles.php?group_id=121684&amp;package_id=150116">
+	mountlo
+    </a>
+				</li>
+				<li>
+    <a href="http://vi-server.org/">
+	Страница автора
+    </a>
+				</li>
+			    </ul>
+			</td>
+                        
+			<!-- Main section !-->
+			<td valign="top">
+			    <!-- Zero method !-->
+			    <p>
+				fusecloop -- это монтировщик сжатых при помощи cloop файлов через FUSE.
+				Такие файлы встречаются на дисках с Knoppix или чем-либо, на Knoppix основанном.
+			    </p>
+			    <p>
+				Если вы хотите получить доступ к файловой системе внутри ISO-шки с Knoppix'ом,
+				то обычно делаете следующие шаги:
+			    </p>
+			    <table border="1">
+			    <tr>
+				<td>1.</td>
+				<td>
+				    <pre>mount -t iso9660 -o loop knoppix.iso /mnt/kn1</pre>
+				</td>
+				<td>
+				    Примонтировать файловую систему ISO чтобы получить доступ к диску KNOPPIX.
+				</td>
+			    </tr>
+			    <tr>
+				<td>2.</td>
+				<td>
+				    <pre>modprobe cloop file=/mnt/kn1/KNOPPIX/KNOPPIX</pre>
+				</td>
+				<td>
+				    Загрузить модуль динамической декомпрессии, передав ему в качестве
+				    аргумета cloop-сжатый файл.
+				</td>
+			    </tr>
+			    <tr>
+				<td>3.</td>
+				<td>
+				    <pre>mount -o loop,ro /dev/cloop /mnt/kn3</pre>
+				</td>
+				<td>
+				    Примонтировать файловую систему, находящуюся внутри сжатого файла.
+				</td>
+			    </tr>
+			    </table>
+			    <p>
+				После этих шагов файловая система Knoppix будет доступна в /mnt/kn3
+			    </p>
+				У этого метода, однако, есть <b>некоторые недостатки</b>:
+				<ol>
+				    <li>
+			    Вам нужены <b>права администратора</b>, чтобы провести каждую из этих операций.
+				    </li>
+				    <li>
+			    Вам нужно найти и собрать <b>модуль cloop</b> для каждого ядра.
+				    </li>
+				    <li>
+			    Монтирование <b>подозрительных файлов</b> может быть небезопасным.
+				    </li>
+				</ol>
+			    <p>
+				Эти недостатки можно устранить используя <b>FUSE</b> --
+				технологию, позволяющую коду файловых систем безопастно выполняться в 
+				<b>пользовательском режиме</b>, что позволяет <b>непривилегированным пользователям</b>
+				монтировать файловые системы, доступные только ему, которые в случае сбоя
+				затронут только программы этого пользователя.
+			    </p>
+			    <hr />
+			    <!-- First method !-->
+			    <p>
+				Доступ к файловой системе Knoppix через FUSE производится так:
+			    </p>
+			    <table border="1">
+			    <tr>
+				<td>1.</td>
+				<td>
+				    <pre>~/bin/mountlo -t iso9660 knoppix.iso ~/mnt/kn1</pre>
+				</td>
+				<td>
+				    Примонтировать файловую систему ISO чтобы получить доступ к диску KNOPPIX.
+				</td>
+			    </tr>
+			    <tr>
+				<td>2.</td>
+				<td>
+				    <pre>~/bin/fusecloop ~/mnt/kn1/KNOPPIX/KNOPPIX ~/mnt/kn2</pre>
+				</td>
+				<td>
+				    Запустить fusecloop, которое будет динамически разжимать данные в ~/mnt/kn2.
+				</td>
+			    </tr>
+			    <tr>
+				<td>3.</td>
+				<td>
+				    <pre>~/bin/mountlo -o ro ~/mnt/kn2 ~/mnt/kn3</pre>
+				</td>
+				<td>
+				    Примонтировать файловую систему, находящуюся внутри сжатого файла.
+				</td>
+			    </tr>
+			    </table>
+			    <p>
+				Все звенья этой цепочки (кроме самого FUSE) будут
+				выполняться в пользовательском режиме.
+			    </p>
+				Недостатки:
+				<ol>
+				    <li>
+			    Оно будет работать <b>медленно</b>.
+				    </li>
+				    <li>
+			    Нужно, чтобы <b>FUSE</b> было установлено и разрешено.
+				    </li>
+				    <li>
+			    Программа <b>fusecloop</b> находится в ранней стадии разработки и пока работает нестабильно (особенно в сочетании с mountlo).
+				    </li>
+				</ol>
+			    <hr />
+                            <!-- Second method !-->
+			    <p>
+				Другой метод получения доступа к диску Knoppix производится так:
+			    </p>
+			    <table border="1">
+			    <tr>
+				<td>1.</td>
+				<td>
+				    <pre>~/bin/fuseiso knoppix.iso ~/mnt/kn1</pre>
+				</td>
+				<td>
+				    Примонтировать файловую систему ISO чтобы получить доступ к диску KNOPPIX.
+				</td>
+			    </tr>
+			    <tr>
+				<td>2.</td>
+				<td>
+				    <pre>~/bin/fusecloop ~/mnt/kn1/KNOPPIX/KNOPPIX ~/mnt/kn2</pre>
+				</td>
+				<td>
+				    Запустить fusecloop, которое будет динамически разжимать данные в ~/mnt/kn2.
+				</td>
+			    </tr>
+			    <tr>
+				<td>3.</td>
+				<td>
+				    <pre>~/bin/fuseiso ~/mnt/kn2 ~/mnt/kn3</pre>
+				</td>
+				<td>
+				    Примонтировать файловую систему, находящуюся внутри сжатого файла.
+				</td>
+			    </tr>
+			    </table>
+			    <p>
+				Единственное отличие -- это использование fuseiso вместо mountlo
+			    </p>
+				Преимущества:
+				<ol>
+				    <li>
+                            Этот способ работает <b>быстрее</b>, чем <b>метод с mountlo</b>.
+				    </li>
+				    <li>
+			    Оно не <b>зависало</b> во время тестирования, как в случае с <b>методом mountlo</b>.
+				    </li>
+				</ol>
+			    <hr />
+			    <p>
+				Текущая версия -- 
+				<a href="http://downloads.sourceforge.net/fusecloop/files/fusecloop-0.20.1.tar.bz2">
+				    0.20.1 alpha.
+				</a>
+			    </p>
+			    <p>
+				Если вы нашли ошибку на этой странице или в fusecloop, сообщите об этом на vi0oss@gmail.com.
+			    </p>
+			    <p>
+				Если fusecloop работает нормально, сообщите об этом всё равно (На момент 2011-01-23 я не получил ни одного письма).
+			    </p>
+			</td>
+		    </tr>
+		    
+		    <!-- Footer !-->
+		    <tr>
+			<td colspan="2" align="right">
+			    <table border="1">
+			    <tr>
+			    <td>
+				Автор: Виталий "_Vi" Шукело
+			    </td>
+                            <td>
+				Хранится на sourceforge.net
+			    </td>
+			    <td>
+				<a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=204637&amp;type=1" width="88" height="31" alt="SourceForge.net Logo" /></a>		
+			    </td>
+			    <td>
+				<a href="http://validator.w3.org/check?uri=referer"><img
+				    src="http://www.w3.org/Icons/valid-xhtml10-blue"
+				    alt="Valid XHTML 1.0 Strict" height="31" width="88" /></a>
+			    </td>
+			    </tr>
+			    </table>
+			</td>
+		    </tr>
+		</table>
+	</body>
+</html>

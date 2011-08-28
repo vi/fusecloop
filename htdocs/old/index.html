@@ -1,0 +1,196 @@
+<html>
+	<head>
+		<title>cloop for FUSE</title>
+	</head>
+	<body>
+		<table border="1">
+		    <!-- Header !-->
+		    <tr>
+			<th colspan="2">
+			    <big>fusecloop</big>
+			</th>
+		    </tr>
+
+		    <tr>
+			<!-- Left section !-->
+			<td valign="top" width="15%">
+			    <ul>
+				<li>
+				    <a href="typescript.html">
+					Demo typescript    
+				    </a>
+				</li>
+			    </ul>
+			    Links:
+			    <ul>
+				<li>
+				<a href="http://sourceforge.net/projects/fusecloop/">
+				    Project page on sf.net
+				</a>
+				</li>
+                                <li>
+    <a href="http://sourceforge.net/project/showfiles.php?group_id=204637&package_id=244263&release_id=536391">
+	Download page on sf.net
+    </a>
+				</li>
+				<li>
+				<a href="http://sourceforge.net/forum/forum.php?forum_id=731223">
+				    Forum on sf.net
+				</a>
+				</li>
+			    </ul>
+			    Other links:
+			    <ul>
+				<li>
+				    <a href="http://fuse.sourceforge.net/">
+				    FUSE
+				    </a>
+				</li>
+				<li>
+    <a href="http://sourceforge.net/project/showfiles.php?group_id=121684&package_id=150116">
+	mountlo
+    </a>
+				</li>
+			    <ul>
+			</td>
+
+			<!-- Main section !-->
+			<td valign="top">
+			    <p>
+				fusecloop is FUSE mounter for compressed loop images.
+				Theese images can be found on Knoppix and Knoppix like CD's
+			    </p>
+			    <p>
+				It you have ISO image of KNOPPIX and you want to access the
+				content of it's filesystem, you'll do the following steps:
+			    </p>
+			    <table border="1">
+			    <tr>
+				<td>1.</td>
+				<td>
+				    <pre>mount -t iso9660 -o loop knoppix.iso /mnt/kn1</pre>
+				</td>
+				<td>
+				    Mount the ISO filesystem to access the content of KNOPPIX cd.
+				</td>
+			    </tr>
+			    <tr>
+				<td>2.</td>
+				<td>
+				    <pre>modprobe cloop file=/mnt/kn1/KNOPPIX/KNOPPIX</pre>
+				</td>
+				<td>
+				    Load dynamic uncompression module, passing compressed KNOPPIX
+				    image to it as an argument.
+				</td>
+			    </tr>
+			    <tr>
+				<td>3.</td>
+				<td>
+				    <pre>mount -o loop,ro /dev/cloop /mnt/kn3</pre>
+				</td>
+				<td>
+				    Mount filesystem indide compressed image
+				</td>
+			    </tr>
+			    </table>
+			    <p>
+				After theese steps you will have KNOPPIX filesystem mounted to /mnt/kn3.
+			    </p>
+			    <p>
+				However, this method have some <b>disadvantages</b>:
+				<ol>
+				    <li>
+			    You need <b>root access</b> to perform each of this operation.
+				    </li>
+				    <li>
+			    You need to find and compile <b>cloop module</b> for each kernel.
+				    </li>
+				    <li>
+			    Mounting <b>untrusted image</b> may compromise your system.
+				    </li>
+				</ol>
+			    </p>
+			    <p>
+				You can cope with theese disadvantages by using <b>FUSE</b> --
+				technology that allows filesystem code to run in <b>userspace</b>
+				in secure way. FUSE allows <b>non-root users</b> to mount filesystem
+				visible only to them and crash of the filesystem will affect
+				only that user.
+			    </p>
+			    <p>
+				Accessing KNOPPIX image throw the FUSE is performed by the following steps:
+			    </p>
+			    <table border="1">
+			    <tr>
+				<td>1.</td>
+				<td>
+				    <pre>~/bin/mountlo -t iso9660 knoppix.iso ~/mnt/kn1</pre>
+				</td>
+				<td>
+				    Mount the ISO filesystem to access the content of KNOPPIX cd.
+				</td>
+			    </tr>
+			    <tr>
+				<td>2.</td>
+				<td>
+				    <pre>~/bin/fusecloop ~/mnt/kn1/KNOPPIX/KNOPPIX \
+~/mnt/kn2 -o nonempty</pre>
+				</td>
+				<td>
+				    Start fusecloop which will dynamically uncompress data to ~/mnt/kn2.
+				</td>
+			    </tr>
+			    <tr>
+				<td>3.</td>
+				<td>
+				    <pre>~/bin/mountlo -o ro ~/mnt/kn2 ~/mnt/kn3</pre>
+				</td>
+				<td>
+				    Mount filesystem indide compressed image
+				</td>
+			    </tr>
+			    </table>
+			    <p>
+				Every part of this chain (except of FUSE itself) will
+				run from userspace.
+			    </p>
+			    <p>
+				Disadvantages:
+				<ol>
+				    <li>
+			    It will work <b>slow</b>.
+				    </li>
+				    <li>
+			    You need to have <b>FUSE</b> installed in enabled.
+				    </li>
+				    <li>
+			    <b>fusecloop</b> module is in early alpha version and it is very unstable.
+				    </li>
+				</ol>
+			    </p>
+			    <p>
+			    Current version is 0.10.7 alpha.
+			    </p>
+
+			</td>
+		    </tr>
+		    
+		    <!-- Footer !-->
+		    <tr>
+			<td colspan="2" align="right">
+			    <table>
+			    <tr>
+                            <td>
+				Hosted by sourceforge.net
+			    </td>
+			    <td>
+				<a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=204637&amp;type=1" width="88" height="31" border="0" alt="SourceForge.net Logo" /></a>		
+			    </td>
+			    </tr>
+			    </table>
+			</td>
+		    </tr>
+		</table>
+	</body>
+</html>

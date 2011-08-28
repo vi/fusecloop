@@ -1,0 +1,51 @@
+Script started on Fri 31 Aug 2007 01:36:34 AM EEST
+vi@vi:~/mnt$ mkdir kn1 kn3
+vi@vi:~/mnt$ touch kn2
+vi@vi:~/mnt$ ls -l
+[00mtotal 0
+drwxr-xr-x 2 vi vi 48 2007-08-31 01:36 [01;34mkn1[00m
+-rw-r--r-- 1 vi vi  0 2007-08-31 01:36 [00mkn2[00m
+drwxr-xr-x 2 vi vi 48 2007-08-31 01:36 [01;34mkn3[00m
+[mvi@vi:~/mnt$ mountlo -o ro /mnt/hda9/pub/iso/livecd/knoppix-v5.0.1cd-2006-06-01-een.iso kn1
+vi@vi:~/mnt$ ~/bin/fusecloop kn1/KNOPPIX/KNOPPIX kn2 -o ro,nonempty
+vi@vi:~/mnt$ ls -l
+[00mtotal 709140
+dr-xr-xr-x 4 root root       2048 2006-06-02 19:40 [01;34mkn1[00m
+-r--r--r-- 1 root root 2039480320 2006-06-02 18:37 [00mkn2[00m
+drwxr-xr-x 2 vi   vi           48 2007-08-31 01:36 [01;34mkn3[00m
+[mvi@vi:~/mnt$ mountlo -o ro kn2 kn3
+vi@vi:~/mnt$ cd kn3
+vi@vi:~/mnt/kn3$ ls
+[00m[01;34mbin[00m    [01;34mdev[00m  [01;34mfloppy[00m  [01;34mlib[00m    [01;34mnone[00m  [01;34mroot[00m  [40;31;01mtftpboot[00m  [01;34mvar[00m
+[01;34mboot[00m   [01;34mdvb[00m  [01;34mhome[00m    [01;34mmedia[00m  [01;34mopt[00m   [01;34msbin[00m  [01;34mtmp[00m       [01;36mvmlinuz[00m
+[01;34mcdrom[00m  [01;34metc[00m  [01;34minitrd[00m  [01;34mmnt[00m    [01;34mproc[00m  [01;34msys[00m   [01;34musr[00m
+[mvi@vi:~/mnt/kn3$ cd ..
+vi@vi:~/mnt$ ls -l
+[00mtotal 709144
+dr-xr-xr-x  4 root root       2048 2006-06-02 19:40 [01;34mkn1[00m
+-r--r--r--  1 root root 2039480320 2006-06-02 18:37 [00mkn2[00m
+drwxr-xr-x 24 root root       4096 2006-05-29 16:58 [01;34mkn3[00m
+[mvi@vi:~/mnt$ mount
+/dev/hdc3 on / type reiserfs (rw,noatime,notail)
+tmpfs on /lib/init/rw type tmpfs (rw,nosuid,mode=0755)
+proc on /proc type proc (rw,noexec,nosuid,nodev)
+sysfs on /sys type sysfs (rw,noexec,nosuid,nodev)
+procbususb on /proc/bus/usb type usbfs (rw)
+udev on /dev type tmpfs (rw,mode=0755)
+tmpfs on /dev/shm type tmpfs (rw,nosuid,nodev)
+devpts on /dev/pts type devpts (rw,noexec,nosuid,gid=5,mode=620)
+fusectl on /sys/fs/fuse/connections type fusectl (rw)
+/dev/hda1 on /media/hda1 type vfat (rw,nosuid,nodev,iocharset=utf8,umask=0022)
+/dev/hda3 on /media/hda3 type reiserfs (rw,noatime,notail)
+/dev/hda10 on /media/hda10 type vfat (rw,nosuid,nodev,iocharset=utf8,umask=0022)
+/dev/hda9 on /media/hda9 type vfat (rw,nosuid,nodev,iocharset=utf8,umask=0022)
+mountlo#/mnt/hda9/pub/iso/livecd/knoppix-v5.0.1cd-2006-06-01-en.iso on /home/vi/mnt/kn1 type fuse (ro,nosuid,nodev,user=vi)
+fuse on /home/vi/mnt/kn2 type fuse (ro,nosuid,nodev,user=vi)
+mountlo#kn2 on /home/vi/mnt/kn3 type fuse (ro,nosuid,nodev,user=vi)
+vi@vi:~/mnt$ fusermount -u kn3
+vi@vi:~/mnt$ fusermount -u kn2
+vi@vi:~/mnt$ fusermount -u kn1
+vi@vi:~/mnt$ rmdir kn3 kn1
+vi@vi:~/mnt$ rm kn2
+vi@vi:~/mnt$ 
+Script done on Fri 31 Aug 2007 01:40:39 AM EEST

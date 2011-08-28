@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+# syncthere: Sync this dir to remote
+#
+# Copyright (c) 2008 Vitaly "_Vi" Shukela. Some rights reserved.
+# 
+#
+# $Id:$
+#
+
+rsync -aP ./* vi0@ssh.sf.net:/home/groups/f/fu/fusecloop/htdocs/

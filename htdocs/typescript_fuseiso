@@ -1,0 +1,46 @@
+Script started on Tue 18 Sep 2007 01:42:25 AM EEST
+]0;vi@vi: ~/mntvi@vi:~/mnt$ ~/bin/fuseiso kn.iso  ~/mnt/kn1
+]0;vi@vi: ~/mntvi@vi:~/mnt$ ~/bin/fusecloop ~/mnt/kn1/KNOPPIX/KNOPPIX \
+> ~/mnt/kn2 -o nonempty
+]0;vi@vi: ~/mntvi@vi:~/mnt$ ~/bin/fuseiso ~/mnt/kn2 ~/mnt/kn3
+]0;vi@vi: ~/mntvi@vi:~/mnt$ cd kn3
+]0;vi@vi: ~/mnt/kn3vi@vi:~/mnt/kn3$ ls
+[00m[01;34mbin[00m   [01;34mcdrom[00m  [01;34mdvb[00m  [01;34mfloppy[00m  [01;34minitrd[00m  [01;34mmedia[00m  [01;34mnone[00m  [01;34mproc[00m  [01;34msbin[00m  [40;31;01mtftpboot[00m  [01;34musr[00m  [01;36mvmlinuz[00m
+[01;34mboot[00m  [01;34mdev[00m    [01;34metc[00m  [01;34mhome[00m    [01;34mlib[00m     [01;34mmnt[00m    [01;34mopt[00m   [01;34mroot[00m  [01;34msys[00m   [01;34mtmp[00m       [01;34mvar[00m
+[m]0;vi@vi: ~/mnt/kn3vi@vi:~/mnt/kn3$ du -sh *
+1.2M	bin
+733K	boot
+512	cdrom
+195K	dev
+2.5K	dvb
+2.1M	etc
+512	floppy
+512	home
+512	initrd
+16M	lib
+1.5K	media
+1.0K	mnt
+512	none
+83M	opt
+512	proc
+512	root
+2.7M	sbin
+512	sys
+0	tftpboot
+512	tmp
+314M	usr
+23M	var
+0	vmlinuz
+]0;vi@vi: ~/mnt/kn3vi@vi:~/mnt/kn3$ cat etc/knoppix-version
+5.0.1 2006-06-01
+]0;vi@vi: ~/mnt/kn3vi@vi:~/mnt/kn3$ cd ..
+]0;vi@vi: ~/mntvi@vi:~/mnt$ fusermount -u kn3
+umount: /home/vi/mnt/kn3: device is busy
+umount: /home/vi/mnt/kn3: device is busy
+]0;vi@vi: ~/mntvi@vi:~/mnt$ # OOps, the shell on another tty
+]0;vi@vi: ~/mntvi@vi:~/mnt$ # OOps, the shell on another ttyvi@vi:~/mnt$ [15Pfusermount -u kn3
+]0;vi@vi: ~/mntvi@vi:~/mnt$ fusermount -u kn3[K2
+]0;vi@vi: ~/mntvi@vi:~/mnt$ fusermount -u kn2[K1
+]0;vi@vi: ~/mntvi@vi:~/mnt$ exit
+
+Script done on Tue 18 Sep 2007 01:46:05 AM EEST

@@ -1,0 +1,74 @@
+<html>
+    <head>
+	<title> fusecloop demo typescript (fusecloop method)</title>
+    </head>
+
+<style type="text/css" title="ANSI colour table">
+    .c30 {           color: black  }
+    .c31 {           color: red    }
+    .c32 {           color: lime   }
+    .c33 {           color: yellow }
+    .c34 {           color: blue   }
+    .c35 {           color: fuchsia}
+    .c36 {           color: aqua   }
+    .c37 {           color: white  }
+    #c40 {background-color:  black  }
+    #c41 {background-color:  red    }
+    #c42 {background-color:  lime   }
+    #c43 {background-color:  yellow }
+    #c44 {background-color:  blue   }
+    #c45 {background-color:  fuchsia}
+    #c46 {background-color:  aqua   }
+    #c47 {background-color:  white  }
+</style>
+<body bgcolor="black" text="white">
+<pre><font>Script started on Tue 18 Sep 2007 01:42:25 AM EEST
+i@vi: ~/mnt vi@vi:~/mnt$ ~/bin/fuseiso kn.iso  ~/mnt/kn1
+i@vi: ~/mnt vi@vi:~/mnt$ ~/bin/fusecloop ~/mnt/kn1/KNOPPIX/KNOPPIX \
+> ~/mnt/kn2 -o nonempty
+i@vi: ~/mnt vi@vi:~/mnt$ ~/bin/fuseiso ~/mnt/kn2 ~/mnt/kn3
+i@vi: ~/mnt vi@vi:~/mnt$ cd kn3
+i@vi: ~/mnt/kn3 vi@vi:~/mnt/kn3$ ls
+</font><font class="c37" id="c40"></font><font class="c34" id="c40">bin</font><font class="c37" id="c40">   </font><font class="c34" id="c40">cdrom</font><font class="c37" id="c40">  </font><font class="c34" id="c40">dvb</font><font class="c37" id="c40">  </font><font class="c34" id="c40">floppy</font><font class="c37" id="c40">  </font><font class="c34" id="c40">initrd</font><font class="c37" id="c40">  </font><font class="c34" id="c40">media</font><font class="c37" id="c40">  </font><font class="c34" id="c40">none</font><font class="c37" id="c40">  </font><font class="c34" id="c40">proc</font><font class="c37" id="c40">  </font><font class="c34" id="c40">sbin</font><font class="c37" id="c40">  </font><font class="c31" id="c40">tftpboot</font><font class="c37" id="c40">  </font><font class="c34" id="c40">usr</font><font class="c37" id="c40">  </font><font class="c36" id="c40">vmlinuz</font><font class="c37" id="c40">
+</font><font class="c34" id="c40">boot</font><font class="c37" id="c40">  </font><font class="c34" id="c40">dev</font><font class="c37" id="c40">    </font><font class="c34" id="c40">etc</font><font class="c37" id="c40">  </font><font class="c34" id="c40">home</font><font class="c37" id="c40">    </font><font class="c34" id="c40">lib</font><font class="c37" id="c40">     </font><font class="c34" id="c40">mnt</font><font class="c37" id="c40">    </font><font class="c34" id="c40">opt</font><font class="c37" id="c40">   </font><font class="c34" id="c40">root</font><font class="c37" id="c40">  </font><font class="c34" id="c40">sys</font><font class="c37" id="c40">   </font><font class="c34" id="c40">tmp</font><font class="c37" id="c40">       </font><font class="c34" id="c40">var</font><font class="c37" id="c40">
+</font><font class="c37" id="c40">i@vi: ~/mnt/kn3 vi@vi:~/mnt/kn3$ du -sh *
+1.2M	bin
+733K	boot
+512	cdrom
+195K	dev
+2.5K	dvb
+2.1M	etc
+512	floppy
+512	home
+512	initrd
+16M	lib
+1.5K	media
+1.0K	mnt
+512	none
+83M	opt
+512	proc
+512	root
+2.7M	sbin
+512	sys
+0	tftpboot
+512	tmp
+314M	usr
+23M	var
+0	vmlinuz
+i@vi: ~/mnt/kn3 vi@vi:~/mnt/kn3$ cat etc/knoppix-version
+5.0.1 2006-06-01
+i@vi: ~/mnt/kn3 vi@vi:~/mnt/kn3$ cd ..
+i@vi: ~/mnt vi@vi:~/mnt$ fusermount -u kn3
+umount: /home/vi/mnt/kn3: device is busy
+umount: /home/vi/mnt/kn3: device is busy
+i@vi: ~/mnt vi@vi:~/mnt$ # OOps, the shell on another tty
+i@vi: ~/mnt vi@vi:~/mnt$ # OOps, the shell on another ttyvi@vi:~/mnt$ fusermount -u kn3
+i@vi: ~/mnt vi@vi:~/mnt$ fusermount -u kn2
+i@vi: ~/mnt vi@vi:~/mnt$ fusermount -u kn1
+i@vi: ~/mnt vi@vi:~/mnt$ exit
+
+Script done on Tue 18 Sep 2007 01:46:05 AM EEST
+</font></pre>
+</body>
+
+</html> <!-- Converted by ansicol.pl and edited by hand !-->
