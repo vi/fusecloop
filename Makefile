@@ -9,13 +9,13 @@ CFLAGS= -Wall
 all: fusecloop extract_compressed_fs create_compressed_fs
 
 extract_compressed_fs: extract_compressed_fs.c
-	${CC} ${CFLAGS} ${LDFLAGS} -lz extract_compressed_fs.c -o extract_compressed_fs
+	${CC} ${CFLAGS} ${LDFLAGS} extract_compressed_fs.c -lz -o extract_compressed_fs
 
 create_compressed_fs: create_compressed_fs.c
-	${CC} ${CFLAGS} ${LDFLAGS} -lz create_compressed_fs.c -o create_compressed_fs
+	${CC} ${CFLAGS} ${LDFLAGS} create_compressed_fs.c -lz -o create_compressed_fs
 
 fusecloop: fusecloop.c cloopreader.o strver debug.o
-	${CC} ${CFLAGS} ${LDFLAGS} -lz cloopreader.o ${FUSECFLAGS} ${FUSELDFLAGS} fusecloop.c debug.o -o fusecloop
+	${CC} ${CFLAGS} ${LDFLAGS} cloopreader.o ${FUSECFLAGS} fusecloop.c debug.o ${FUSELDFLAGS} -lz -o fusecloop
 
 # ${FUSECFLAGS} here for 64 bit file pointers.
 cloopreader.o: cloopreader.c
