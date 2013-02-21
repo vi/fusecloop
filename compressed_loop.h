@@ -96,7 +96,8 @@ static inline char *build_index(struct block_info *offsets, unsigned long n)
 		return "32BE v0.68";
 	}
 	else { /* V3.0 */
-		int i, j;
+		int i;
+		loff_t j;
 		
 		for (i = n; i-- > 0; )
 			offsets[i].size = ntohl(ofs32[i]); 
