@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
     argv2[0]=argv[0];
     for(i=2;i<argc;++i)argv2[i-1]=argv[i];
     argv2[argc-1]="-o";
-    argv2[argc+0]="nonempty,direct_io";
+    argv2[argc+0]="nonempty,direct_io,ro";
     argv2[argc+1]=0;
 
     ret=fuse_main(argc-1+2, argv2, &fusecloop_oper, NULL);

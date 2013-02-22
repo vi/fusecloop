@@ -70,7 +70,7 @@ int cloop_init(struct cloop_data *c, int fh){
 	c->tocsize = ntohl(tail.index_size) * c->numblocks;
 	OP(lseek(c->fh, end - sizeof(tail) - c->tocsize, SEEK_SET));
     }
-    ALLOC(c->toc,c->tocsize);
+    ALLOC(c->toc,sizeof(*c->toc) * c->numblocks);
 
     OP(read_all(c->fh,c->toc,c->tocsize));  /* read Data Index */
     build_index(c->toc, c->numblocks);
