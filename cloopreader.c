@@ -27,20 +27,20 @@
 
 static int read_all(int fh, void* block, size_t size){
     bfuncinfo("fh=%d block=0x%lx size=0x%lx",
-	    fh,(ulong)block,(ulong)size);
+        fh,(ulong)block,(ulong)size);
     char* bl=(char*)block;
     int ret;
     for(;size;){
-	for(;;){
-	    bprintf("invoking read(%d,0x%lx,0x%lx)\n",
-		    fh,(ulong)bl,(ulong)size);
-	    ret=read(fh,bl,size);
-	    bprintf("    returned %d, errno=%d\n",ret,errno);
-	    if(ret==-1&&errno==EINTR)continue;
-	    if(ret==-1||ret==0)return -1;
-	    break;
-	}
-	size-=ret;
+        for(;;){
+            bprintf("invoking read(%d,0x%lx,0x%lx)\n",
+                fh,(ulong)bl,(ulong)size);
+            ret=read(fh,bl,size);
+            bprintf("    returned %d, errno=%d\n",ret,errno);
+            if(ret==-1&&errno==EINTR)continue;
+            if(ret==-1||ret==0)return -1;
+            break;
+        }
+        size-=ret;
         bl+=ret;
     }
     return 0;
