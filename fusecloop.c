@@ -39,7 +39,6 @@
 #include <fuse.h>
 #include <time.h>
 #include <stdio.h>  // for fprintf
-#include <malloc.h> // for malloc
 
 const char* version=
 #include "strver"

@@ -55,7 +55,14 @@ __bswap64(__uint64_t _x)
 #endif /* be64toh */
 #define __be64_to_cpu be64toh
 #else  /* __FreeBSD__ */
+#ifndef __APPLE__
 #include <asm/byteorder.h>
+#else /* __APPLE__ */
+#include <libkern/OSByteOrder.h>
+#define __be64_to_cpu OSSwapBigToHostInt64
+#define __le64_to_cpu OSSwapLittleToHostInt64
+typedef off_t loff_t;
+#endif /* __APPLE__ */
 #include <arpa/inet.h> /* ntohl */
 #endif /* __FreeBSD__ */
 #include "compressed_loop.h"
