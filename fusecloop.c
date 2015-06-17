@@ -54,10 +54,17 @@ struct stat stb;
 
 struct cloop_data cd;
 
+#ifndef __APPLE__
+static const char *filename = "/";
+#else
+static const char *filename = "/data.dmg";
+#endif
+
 static int fusecloop_getattr(const char *path, struct stat *stbuf)
 {
     bfuncinfo("path=%s",path);
 
+#ifndef __APPLE__
     if(strcmp(path, "/") != 0)
         return -ENOENT;
 	
@@ -74,6 +81,19 @@ static int fusecloop_getattr(const char *path, struct stat *stbuf)
     stbuf->st_blocks = 0;
     stbuf->st_atime = stbuf->st_mtime = stbuf->st_ctime = time(NULL);
     */    
+#else
+    memset(stbuf, 0, sizeof(struct stat));
+    if (strcmp(path, "/") == 0) {
+        stbuf->st_mode = S_IFDIR | 0755;
+        stbuf->st_nlink = 2;
+    } else if (strcmp(path, filename) == 0) {
+        stbuf->st_mode = S_IFREG | 0444;
+        stbuf->st_nlink = 1;
+        stbuf->st_size = (loff_t) cd.blocksize * cd.numblocks;
+    } else {
+        return -ENOENT;
+    }
+#endif
 
     return 0;
 }
@@ -84,7 +104,7 @@ static int fusecloop_truncate(const char *path, off_t size)
 
     bfuncinfo("path=%s size=0x%lx",path,(ulong)size);
 
-    if(strcmp(path, "/") != 0)
+    if(strcmp(path, filename) != 0)
         return -ENOENT;
 
     return -EPERM;
@@ -96,7 +116,7 @@ static int fusecloop_open(const char *path, struct fuse_file_info *fi)
     bfuncinfo("path=%s",path);
 
 
-    if(strcmp(path, "/") != 0)
+    if(strcmp(path, filename) != 0)
         return -ENOENT;
 
     return 0;
@@ -118,7 +138,7 @@ static int fusecloop_read(const char *path, char *buf, size_t size,
     bfuncinfo("path=%s buf=0x%lx size=0x%lx offset=0x%lx sizeof(off_t)=%d",
 	    path,(ulong)buf,(ulong)size,(ulong)offset,sizeof(off_t));
 
-    if(strcmp(path, "/") != 0)
+    if(strcmp(path, filename) != 0)
         return -ENOENT;
 
     if(fi->flags & O_WRONLY || fi->flags & O_RDWR)
@@ -146,7 +166,7 @@ static int fusecloop_write(const char *path, const char *buf, size_t size,
     (void) offset;
     (void) fi;
 
-    if(strcmp(path, "/") != 0)
+    if(strcmp(path, filename) != 0)
         return -ENOENT;
 
     return -EPERM;
@@ -155,13 +175,31 @@ static int fusecloop_write(const char *path, const char *buf, size_t size,
 static int fusecloop_utimens(const char *path, const struct timespec ts[2]){
     bfuncinfo("path=%s",path);
 
-    if(strcmp(path, "/") != 0)
+    if(strcmp(path, filename) != 0)
         return -ENOENT;
 
     bprintf("Silently ignoring utimens\n");
 
     return 0;
 }
+
+#ifdef __APPLE__
+static int fusecloop_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
+                         off_t offset, struct fuse_file_info *fi)
+{
+    (void) offset;
+    (void) fi;
+    
+    if (strcmp(path, "/") != 0)
+        return -ENOENT;
+    
+    filler(buf, ".", NULL, 0);
+    filler(buf, "..", NULL, 0);
+    filler(buf, filename + 1, NULL, 0);
+    
+    return 0;
+}
+#endif
 
 static struct fuse_operations fusecloop_oper = {
     .getattr	= fusecloop_getattr,
@@ -170,6 +208,9 @@ static struct fuse_operations fusecloop_oper = {
     .read	= fusecloop_read,
     .write	= fusecloop_write,   
     .utimens    = fusecloop_utimens,
+#ifdef __APPLE__
+    .readdir = fusecloop_readdir,
+#endif
 };
 
 int main(int argc, char *argv[])
@@ -195,7 +236,11 @@ int main(int argc, char *argv[])
     argv2[0]=argv[0];
     for(i=2;i<argc;++i)argv2[i-1]=argv[i];
     argv2[argc-1]="-o";
+#ifndef __APPLE__
     argv2[argc+0]="nonempty,direct_io,ro";
+#else
+    argv2[argc+0]="direct_io,ro";
+#endif
     argv2[argc+1]=0;
 
     ret=fuse_main(argc-1+2, argv2, &fusecloop_oper, NULL);
