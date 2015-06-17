@@ -25,7 +25,7 @@
 #include "debug.h"
 #include "cloopreader.h"
 
-int read_all(int fh, void* block, size_t size){
+static int read_all(int fh, void* block, size_t size){
     bfuncinfo("fh=%d block=0x%lx size=0x%lx",
 	    fh,(ulong)block,(ulong)size);
     char* bl=(char*)block;
