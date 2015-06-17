@@ -61,14 +61,14 @@ int cloop_init(struct cloop_data *c, int fh){
 
     c->tocsize=sizeof(*c->toc) * c->numblocks;
     if (c->numblocks == -1) {
-	struct cloop_tail tail;
-	loff_t end = lseek(c->fh,0,SEEK_END); /* lseek(,-n,SEEK_END) buggy ? */
+		struct cloop_tail tail;
+		loff_t end = lseek(c->fh,0,SEEK_END); /* lseek(,-n,SEEK_END) buggy ? */
 
-	OP(lseek(c->fh, end - sizeof(tail), SEEK_SET)); 
-	OP(read_all(c->fh, &tail, sizeof(tail)));
-	c->numblocks = ntohl(tail.num_blocks);
-	c->tocsize = ntohl(tail.index_size) * c->numblocks;
-	OP(lseek(c->fh, end - sizeof(tail) - c->tocsize, SEEK_SET));
+		OP(lseek(c->fh, end - sizeof(tail), SEEK_SET));
+		OP(read_all(c->fh, &tail, sizeof(tail)));
+		c->numblocks = ntohl(tail.num_blocks);
+		c->tocsize = ntohl(tail.index_size) * c->numblocks;
+		OP(lseek(c->fh, end - sizeof(tail) - c->tocsize, SEEK_SET));
     }
     ALLOC(c->toc,sizeof(*c->toc) * c->numblocks);
 
