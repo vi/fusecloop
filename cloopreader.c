@@ -25,16 +25,16 @@
 #include "debug.h"
 #include "cloopreader.h"
 
-static int read_all(int fh, void* block, size_t size){
+static int pread_all(int fh, void* block, size_t size, off_t offset){
     bfuncinfo("fh=%d block=0x%lx size=0x%lx",
         fh,(ulong)block,(ulong)size);
     char* bl=(char*)block;
-    int ret;
+    ssize_t ret;
     for(;size;){
         for(;;){
             bprintf("invoking read(%d,0x%lx,0x%lx)\n",
                 fh,(ulong)bl,(ulong)size);
-            ret=read(fh,bl,size);
+            ret=pread(fh,bl,size,offset);
             bprintf("    returned %d, errno=%d\n",ret,errno);
             if(ret==-1&&errno==EINTR)continue;
             if(ret==-1||ret==0)return -1;
@@ -50,7 +50,7 @@ int cloop_init(struct cloop_data *c, int fh){
     bfuncinfo("fh=%d",fh);
     c->fh=fh;
     struct cloop_head head;
-    OP(read_all(c->fh,&head,sizeof head));   /* read Header */
+    OP(pread_all(c->fh,&head,sizeof head,0));   /* read Header */
 
     c->numblocks=ntohl(head.num_blocks);
     c->blocksize=ntohl(head.block_size);
@@ -59,20 +59,20 @@ int cloop_init(struct cloop_data *c, int fh){
 
     ALLOC(c->pblock,c->blocksize);
 
+    off_t blocks_offset = sizeof head;
     c->tocsize=sizeof(*c->toc) * c->numblocks;
     if (c->numblocks == -1) {
 		struct cloop_tail tail;
 		loff_t end = lseek(c->fh,0,SEEK_END); /* lseek(,-n,SEEK_END) buggy ? */
 
-		OP(lseek(c->fh, end - sizeof(tail), SEEK_SET));
-		OP(read_all(c->fh, &tail, sizeof(tail)));
+		OP(pread_all(c->fh, &tail, sizeof(tail), end - sizeof(tail)));
 		c->numblocks = ntohl(tail.num_blocks);
 		c->tocsize = ntohl(tail.index_size) * c->numblocks;
-		OP(lseek(c->fh, end - sizeof(tail) - c->tocsize, SEEK_SET));
+        blocks_offset = end - sizeof(tail) - c->tocsize;
     }
     ALLOC(c->toc,sizeof(*c->toc) * c->numblocks);
 
-    OP(read_all(c->fh,c->toc,c->tocsize));  /* read Data Index */
+    OP(pread_all(c->fh,c->toc,c->tocsize,blocks_offset));  /* read Data Index */
     build_index(c->toc, c->numblocks);
     c->cblocksizecur=0;
     c->curblock=-1;
@@ -90,9 +90,6 @@ int cloop_swap(struct cloop_data *c,ulong page){
     if(page>=c->numblocks){errno=EFAULT;return -1;}
     c->curblock=page;
 
-    bprintf("Seeking to 0x%Lx\n",c->toc[page].offset);
-    OP(lseek(c->fh,c->toc[page].offset, SEEK_SET)); 
-
     c->cblocksize=c->toc[page].size;
     bprintf("Compressed size=%lu\n",c->cblocksize);
     if(c->cblocksize > c->cblocksizecur){
@@ -103,7 +100,7 @@ int cloop_swap(struct cloop_data *c,ulong page){
 	OPA(c->cblock,ZER);
     }
 
-    OP(read_all(c->fh, c->cblock, c->cblocksize));
+    OP(pread_all(c->fh, c->cblock, c->cblocksize, c->toc[page].offset));
 
     destlen=c->blocksize;
     bprintf(
