@@ -44,4 +44,8 @@ if (APPLE)
         -L/usr/local/lib
         -losxfuse
     )
+else()
+    message(SEND_ERROR "This CMakeLists.txt works only for OS X currently.\n"
+    "Use simple Makefile from repository instead.\n"
+    "If you like CMake and want to use it for Linux as well, submit a pull request with a fix.")
 endif()
