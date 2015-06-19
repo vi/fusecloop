@@ -42,6 +42,7 @@ static int pread_all(int fh, void* block, size_t size, off_t offset){
         }
         size-=ret;
         bl+=ret;
+        offset+=ret;
     }
     return 0;
 }
