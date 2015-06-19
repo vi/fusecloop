@@ -128,16 +128,16 @@ int cloop_read(struct cloop_data* c, off_t offset,void* buf,ulong size){
     if(!size)return 0;
     page = offset / c->blocksize;
     if(page >= c->numblocks){
-	// End of file;
-	return 0;
+        // End of file;
+        return 0;
     }
     offset %= c->blocksize;
     bprintf("page=%d offset=0x%llx size=0x%lx\n",page,offset,size);
     if(cloop_swap(c,page))return -1;
     bprintf("size=0x%lx c->blocksize=0x%lx\n",size,c->blocksize);
     if(offset+size > c->blocksize){
-	size=c->blocksize-offset; /* chop to size of block */
-	bprintf("size updated: size=0x%lx\n",size);
+        size=c->blocksize-offset; /* chop to size of block */
+        bprintf("size updated: size=0x%lx\n",size);
     }
     memcpy(buf,c->pblock+offset,size);
     return size;
@@ -149,11 +149,11 @@ int cloop_read_all(struct cloop_data* c, off_t offset,void* buf,ulong size){
     int ret;
     int siz=size;
     for(;siz;){
-	ret=cloop_read(c,offset,bl,siz);
-	if(ret==-1||ret==0)return -1;
-	siz-=ret;
+        ret=cloop_read(c,offset,bl,siz);
+        if(ret==-1||ret==0)return -1;
+        siz-=ret;
         bl+=ret;
-	offset+=ret;
+        offset+=ret;
     }
     return size;
 }
