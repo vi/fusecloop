@@ -128,21 +128,21 @@ static int fusecloop_read(const char *path, char *buf, size_t size,
                      off_t offset, struct fuse_file_info *fi)
 {
     if(busy){
-	/* This is just for debugging (checking if we need reentrancy)
-	 * It seems we don't when using direct_io flag and do if not.
-	 */
-	bprintf("***FAILURE***\n");
+        /* This is just for debugging (checking if we need reentrancy)
+        * It seems we don't when using direct_io flag and do if not.
+        */
+        bprintf("***FAILURE***\n");
     }
     busy=1;
     int res;
     bfuncinfo("path=%s buf=0x%lx size=0x%lx offset=0x%lx sizeof(off_t)=%d",
-	    path,(ulong)buf,(ulong)size,(ulong)offset,sizeof(off_t));
+        path,(ulong)buf,(ulong)size,(ulong)offset,sizeof(off_t));
 
     if(strcmp(path, filename) != 0)
         return -ENOENT;
 
     if(fi->flags & O_WRONLY || fi->flags & O_RDWR)
-    	return -EPERM;
+        return -EPERM;
 
     
     res = cloop_read(&cd,offset,buf,size);/*pread(fd, buf, size, offset)*/;
