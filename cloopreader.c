@@ -148,13 +148,16 @@ int cloop_read_all(struct cloop_data* c, off_t offset,void* buf,ulong size){
     char* bl=(char*)buf;
     int ret;
     int siz=size;
+    size_t read_size = 0;
     for(;siz;){
         ret=cloop_read(c,offset,bl,siz);
-        if(ret==-1||ret==0)return -1;
+        if(ret==-1)return -1;
+        if(ret==0)break;
         siz-=ret;
         bl+=ret;
         offset+=ret;
+        read_size+=ret;
     }
-    return size;
+    return read_size;
 }
 
