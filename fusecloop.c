@@ -145,7 +145,7 @@ static int fusecloop_read(const char *path, char *buf, size_t size,
         return -EPERM;
 
     
-    res = cloop_read(&cd,offset,buf,size);/*pread(fd, buf, size, offset)*/;
+    res = cloop_read_all(&cd,offset,buf,size);/*pread(fd, buf, size, offset)*/;
     if (res == -1)
         res = -errno;
 
@@ -216,7 +216,7 @@ static struct fuse_operations fusecloop_oper = {
 int main(int argc, char *argv[])
 {
     int fd,ret,i;
-    char* argv2[argc-1+2];  // File name removed, "-o nonempty,direct_io" added
+    char* argv2[argc-1+3];  // File name removed, "-o nonempty -s" added
 
     if(argc<3){
 	fprintf(stderr,"fusecloop version %s alpha. Coded by _Vi. GPL.\n",
@@ -237,13 +237,14 @@ int main(int argc, char *argv[])
     for(i=2;i<argc;++i)argv2[i-1]=argv[i];
     argv2[argc-1]="-o";
 #ifndef __APPLE__
-    argv2[argc+0]="nonempty,direct_io,ro";
+    argv2[argc+0]="nonempty,ro";
 #else
-    argv2[argc+0]="direct_io,ro";
+    argv2[argc+0]="ro";
 #endif
-    argv2[argc+1]=0;
+    argv2[argc+1]="-s";
+    argv2[argc+2]=0;
 
-    ret=fuse_main(argc-1+2, argv2, &fusecloop_oper, NULL);
+    ret=fuse_main(argc-1+3, argv2, &fusecloop_oper, NULL);
 
     OP(close(fd));
 
