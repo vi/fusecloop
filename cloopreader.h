@@ -45,9 +45,6 @@ struct cloop_data{
     int curblock; /* Number of current block (which is decompressed to pblock) */
 };
 
-/* Read all requested data */
-int read_all(int fh, void* block, size_t size);
-
 /* Initialize cloop reader */
 int cloop_init(struct cloop_data *c, int fh);
 
