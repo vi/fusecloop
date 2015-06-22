@@ -39,6 +39,9 @@ void dbg_init(int argc, char* argv[]){
 }
 
 #else
-void dbg_init(int argc, char* argv[]){}
+void dbg_init(int argc, char* argv[]){
+    (void) argc;
+    (void) argv;
+}
 #endif
 
