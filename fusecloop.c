@@ -165,6 +165,7 @@ static int fusecloop_write(const char *path, const char *buf, size_t size,
     (void) buf;
     (void) offset;
     (void) fi;
+    (void) size;
 
     if(strcmp(path, filename) != 0)
         return -ENOENT;
@@ -174,6 +175,7 @@ static int fusecloop_write(const char *path, const char *buf, size_t size,
 
 static int fusecloop_utimens(const char *path, const struct timespec ts[2]){
     bfuncinfo("path=%s",path);
+    (void) ts;
 
     if(strcmp(path, filename) != 0)
         return -ENOENT;
