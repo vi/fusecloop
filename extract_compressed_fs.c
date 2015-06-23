@@ -3,6 +3,10 @@
 #include "common_header.h"
 #define CLOOP_PREAMBLE "#!/bin/sh\n" "#V2.0 Format\n" "insmod cloop.o file=$0 && mount -r -t iso9660 /dev/cloop $1\n" "exit $?\n"
 
+#if __APPLE__
+#define lseek64 lseek
+#endif
+
 int main(int argc, char *argv[])
 {
 	int handle;
