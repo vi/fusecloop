@@ -24,7 +24,23 @@ add_executable(${PROJECT_NAME}
     compressed_loop.h
 )
 
+add_executable(create_compressed_fs
+    create_compressed_fs.c
+)
+
+add_executable(extract_compressed_fs
+    extract_compressed_fs.c
+)
+
 target_link_libraries(${PROJECT_NAME}
+    ${ZLIB_LIBRARIES}
+)
+
+target_link_libraries(create_compressed_fs
+    ${ZLIB_LIBRARIES}
+)
+
+target_link_libraries(extract_compressed_fs
     ${ZLIB_LIBRARIES}
 )
 
