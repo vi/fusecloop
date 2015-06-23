@@ -1,7 +1,13 @@
 /* Extracts a filesystem back from a compressed fs file */
 #define _LARGEFILE64_SOURCE
 #include "common_header.h"
+#include <stdint.h>
+#include <inttypes.h>
 #define CLOOP_PREAMBLE "#!/bin/sh\n" "#V2.0 Format\n" "insmod cloop.o file=$0 && mount -r -t iso9660 /dev/cloop $1\n" "exit $?\n"
+
+#if __APPLE__
+#define lseek64 lseek
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -84,21 +90,21 @@ int main(int argc, char *argv[])
 		unsigned int size = offsets[i].size;
 
 		if (lseek64(handle, offsets[i].offset, SEEK_SET) < 0) {
-			fprintf(stderr, "lseek to %Lu: %s\n",
-				offsets[i].offset, strerror(errno));
+			fprintf(stderr, "lseek to %" PRId64 ": %s\n",
+				(int64_t)offsets[i].offset, strerror(errno));
 			exit(1);
 		}
                 
 		if (size > zblock_maxsize) {
 			fprintf(stderr, 
-				"Size %u for block %u (offset %Lu) too big\n",
-				size, i, offsets[i].offset);
+				"Size %u for block %u (offset %" PRId64 ") too big\n",
+				size, i, (int64_t)offsets[i].offset);
 			exit(1);
 		}
 		read(handle, buffer, size);
 
-		fprintf(stderr, "Block %u at %llu length %u => %lu\n",
-			i, offsets[i].offset, size, destlen);
+		fprintf(stderr, "Block %u at %" PRId64 " length %u => %lu\n",
+			i, (int64_t)offsets[i].offset, size, destlen);
 		if (i == 3) {
 			fprintf(stderr,
 				"Block head:%02X%02X%02X%02X%02X%02X%02X%02X\n",
