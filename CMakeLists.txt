@@ -61,7 +61,9 @@ if (APPLE)
         -losxfuse
     )
 else()
-    message(SEND_ERROR "This CMakeLists.txt works only for OS X currently.\n"
-    "Use simple Makefile from repository instead.\n"
-    "If you like CMake and want to use it for Linux as well, submit a pull request with a fix.")
+    find_package(PkgConfig)
+    pkg_search_module(FUSE REQUIRED fuse)
+    target_link_libraries(${PROJECT_NAME} ${FUSE_LIBRARIES})
+    target_include_directories(${PROJECT_NAME} PUBLIC ${FUSE_INCLUDE_DIRS})
+    target_compile_options(${PROJECT_NAME} PUBLIC ${FUSE_CFLAGS_OTHER})
 endif()
