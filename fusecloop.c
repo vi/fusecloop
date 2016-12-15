@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
     char* argv2[argc-1+3];  // File name removed, "-o nonempty -s" added
 
     if(argc<3){
-	fprintf(stderr,"fusecloop version %s alpha. Coded by _Vi. GPL.\n",
+	fprintf(stderr,"fusecloop version %s alpha. Coded by _Vi. LGPL v3+.\n",
 		version);
 	fprintf(stderr,"Usage: %s file_or_device mountpoint_file\n",argv[0]);
 	return 1;
