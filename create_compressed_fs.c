@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 	struct cloop_tail tail;
 	unsigned long  block_size = 0;
 	unsigned char *compressed, *uncompressed;
-	unsigned long *index;
+	uint32_t *index;
 	int n, indexmax, zlenmax;
 	
 	if (argc > 1) {
