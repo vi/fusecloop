@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 	struct cloop_tail tail;
 	unsigned long  block_size = 0;
 	unsigned char *compressed, *uncompressed;
-	unsigned long *index;
+	uint32_t *index;
 	int n, indexmax, zlenmax;
 	
 	if (argc > 1) {
@@ -70,11 +70,11 @@ int main(int argc, char *argv[])
 			if (!index)
 				quit("Realloc");
 		}
-		index[n] = ntohl(len);
+		index[n] = htonl(len);
 	}
 	write(STDOUT_FILENO, index, n * sizeof(*index));
-	tail.index_size = ntohl(sizeof(*index));
-	tail.num_blocks = ntohl(n);
+	tail.index_size = htonl(sizeof(*index));
+	tail.num_blocks = htonl(n);
 	write(STDOUT_FILENO, &tail, sizeof(tail));
 	return 0;
 }
